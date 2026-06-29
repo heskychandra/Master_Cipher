@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MASTER CIPHER</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
+
+:root {
+  --black:      #060606;
+  --panel:      #111;
+  --border:     #1c1c1c;
+  --dim:        #252525;
+  --muted:      #444;
+  --sub:        #888;
+  --text:       #bbb;
+  --white:      #efefef;
+  --gold:       #e8c84a;
+  --gold-dim:   rgba(232,200,74,0.10);
+  --gold-glow:  rgba(232,200,74,0.25);
+  --teal:       #4ae8c8;
+  --teal-dim:   rgba(74,232,200,0.08);
+  --red:        #e84a4a;
+  --red-dim:    rgba(232,74,74,0.08);
+  --green:      #4ae87a;
+  --green-dim:  rgba(74,232,122,0.10);
+  --green-glow: rgba(74,232,122,0.25);
+  --r:   4px;
+  --r-lg:8px;
+  --tr:  0.15s ease;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--black);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
+button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:none;color:inherit;}
+
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;min-height:100vh;max-width:440px;margin:0 auto;width:100%;}
+.screen.active{display:flex;}
+
+/* ── OVERLAY ──
+   display:none by default, JS sets display:flex then adds .show for opacity */
+.overlay{
+  position:fixed;inset:0;z-index:200;
+  display:none;
+  flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s ease;
+}
+.overlay.show{display:flex;opacity:1;pointer-events:all;}
+.overlay-fs{padding:0;align-items:stretch;justify-content:flex-start;}
+
+/* ════════════════════════════════════════
+   HOME
+════════════════════════════════════════ */
+#s-home{align-items:center;justify-content:center;padding:40px 24px;position:relative;overflow:hidden;}
+.home-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(232,200,74,.035) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(232,200,74,.035) 1px,transparent 1px);
+  background-size:44px 44px;animation:grid-pulse 4s ease-in-out infinite;
+}
+@keyframes grid-pulse{0%,100%{opacity:.6}50%{opacity:1}}
+.home-scanline{position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);}
+.home-hdr{position:absolute;top:16px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;z-index:10;}
+.home-ver{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
+
+.home-eyebrow{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:6px;color:rgba(232,200,74,.4);margin-bottom:14px;position:relative;z-index:2;}
+.home-logo{position:relative;z-index:2;text-align:center;margin-bottom:6px;line-height:.85;}
+.logo-master{font-family:'Orbitron',sans-serif;font-size:clamp(36px,11vw,56px);font-weight:900;color:var(--white);letter-spacing:-1px;}
+.logo-cipher{font-family:'Orbitron',sans-serif;font-size:clamp(36px,11vw,56px);font-weight:900;color:var(--gold);letter-spacing:-1px;display:block;}
+.home-tagline{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-top:10px;margin-bottom:32px;position:relative;z-index:2;}
+
+/* Mode cards */
+.mode-cards{width:100%;max-width:360px;display:flex;flex-direction:column;gap:8px;margin-bottom:16px;position:relative;z-index:2;}
+.mode-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  cursor:pointer;overflow:hidden;display:flex;align-items:stretch;
+  transition:border-color var(--tr),background var(--tr);user-select:none;
+}
+.mode-card:active{background:var(--dim);}
+
+/* Classic = green */
+.mode-card[data-mode="classic"].sel{border-color:var(--green);}
+.mode-card[data-mode="classic"].sel .mc-accent{background:var(--green);}
+.mode-card[data-mode="classic"].sel .mc-title{color:var(--green);}
+.mode-card[data-mode="classic"].sel .mc-tag{color:var(--green);border-color:rgba(74,232,122,.3);}
+
+/* Fight = gold */
+.mode-card[data-mode="fight"].sel{border-color:var(--gold);}
+.mode-card[data-mode="fight"].sel .mc-accent{background:var(--gold);}
+.mode-card[data-mode="fight"].sel .mc-title{color:var(--gold);}
+.mode-card[data-mode="fight"].sel .mc-tag{color:var(--gold);border-color:rgba(232,200,74,.3);}
+
+/* Smart = red */
+.mode-card[data-mode="smart"].sel{border-color:var(--red);}
+.mode-card[data-mode="smart"].sel .mc-accent{background:var(--red);}
+.mode-card[data-mode="smart"].sel .mc-title{color:var(--red);}
+.mode-card[data-mode="smart"].sel .mc-tag{color:var(--red);border-color:rgba(232,74,74,.3);}
+
+.mc-accent{width:3px;flex-shrink:0;background:var(--muted);transition:background var(--tr);}
+.mc-body{padding:15px 16px;flex:1;display:flex;flex-direction:column;gap:4px;}
+.mc-top{display:flex;align-items:center;justify-content:space-between;}
+.mc-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;color:var(--white);letter-spacing:1px;transition:color var(--tr);}
+.mc-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);border:1px solid var(--border);border-radius:2px;padding:3px 7px;transition:color var(--tr),border-color var(--tr);}
+.mc-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.5px;}
+
+.btn-main{
+  width:100%;max-width:360px;background:var(--gold);color:var(--black);
+  font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;
+  border:none;border-radius:var(--r);padding:17px;cursor:pointer;
+  transition:opacity var(--tr);position:relative;z-index:2;
+}
+.btn-main:active{opacity:.8;}
+
+.home-stats{
+  margin-top:16px;width:100%;max-width:360px;
+  display:flex;border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;position:relative;z-index:2;
+}
+.hs-item{flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--border);}
+.hs-item:last-child{border-right:none;}
+.hs-val{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;color:var(--gold);line-height:1;}
+.hs-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--muted);margin-top:4px;}
+
+/* Menu button */
+.btn-menu{
+  background:transparent;border:1px solid var(--border);border-radius:var(--r);
+  width:38px;height:38px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  transition:border-color var(--tr);
+}
+.btn-menu:active{border-color:var(--gold);}
+.menu-pip{width:4px;height:4px;border-radius:50%;background:var(--sub);}
+.btn-menu:active .menu-pip{background:var(--gold);}
+
+/* ════════════════════════════════════════
+   GAME SCREEN
+════════════════════════════════════════ */
+#s-game{position:relative;}
+.g-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--black);z-index:10;
+}
+.gh-left{display:flex;flex-direction:column;}
+.gh-badge{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--green);}
+.gh-badge.mode-fight{color:var(--gold);}
+.gh-badge.mode-smart{color:var(--red);}
+.gh-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--white);}
+.gh-right{display:flex;align-items:center;gap:14px;}
+.stat{text-align:right;}
+.stat-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);display:block;}
+.stat-val{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;color:var(--white);line-height:1;}
+#sv-timer{color:var(--gold);}
+#sv-timer.urgent{color:var(--red);animation:blink .5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.btn-home-game{
+  background:transparent;border:1px solid var(--border);color:var(--muted);
+  font-size:18px;border-radius:var(--r);width:36px;height:36px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:border-color var(--tr),color var(--tr);flex-shrink:0;
+}
+.btn-home-game:active{border-color:var(--gold);color:var(--gold);}
+
+.score-bar{padding:8px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sb-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);}
+.sb-score{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--gold);transition:color .3s;}
+.hint-chip{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--teal);border:1px solid rgba(74,232,200,.25);border-radius:3px;padding:4px 8px;}
+
+/* Mode banners */
+.mode-banner{padding:7px 16px;display:flex;align-items:center;justify-content:space-between;}
+.fight-banner{background:rgba(232,200,74,.06);border-bottom:1px solid rgba(232,200,74,.18);}
+.smart-banner{background:rgba(232,74,74,.06);border-bottom:1px solid rgba(232,74,74,.18);}
+.mb-text{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;}
+.fight-banner .mb-text{color:var(--gold);}
+.smart-banner .mb-text{color:var(--red);}
+.mb-dot{width:6px;height:6px;border-radius:50%;animation:blink 1s infinite;}
+.fight-banner .mb-dot{background:var(--gold);}
+.smart-banner .mb-dot{background:var(--red);}
+
+/* History panel */
+.history{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px;}
+.h-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:48px 0;}
+.h-empty-icon{font-size:28px;opacity:.25;}
+.h-empty-txt{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);}
+.h-row{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r);animation:slidein .18s ease;
+}
+@keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.h-idx{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);width:16px;flex-shrink:0;}
+.h-digits{display:flex;gap:3px;flex:1;}
+.h-d{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--white);width:24px;text-align:center;}
+.h-d.smart{font-size:13px;width:18px;}
+.h-result{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:72px;}
+.h-dot-row{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);display:flex;align-items:center;gap:5px;}
+.h-fame-row{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--teal);display:flex;align-items:center;gap:5px;}
+/* Smart mode: fame row berwarna merah */
+.h-fame-row.smart{color:var(--red);}
+.h-dn,.h-fn{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;}
+.h-row.fight-hide .h-result{visibility:hidden;}
+.h-hint-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--teal);border:1px solid rgba(74,232,200,.2);border-radius:2px;padding:2px 5px;flex-shrink:0;}
+
+/* DOT/FAME live display */
+.fd-display{
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:10px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;
+}
+.fd-item{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 12px;}
+.fd-sep{width:1px;background:var(--border);align-self:stretch;}
+.fd-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
+.fd-val{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;}
+.fd-val.gold{color:var(--gold);}
+.fd-val.teal{color:var(--teal);}
+.fd-val.green{color:var(--green);}
+
+/* Smart mode fd-display: only FAME, red border */
+.fd-display.smart-only{border-color:rgba(232,74,74,.3);}
+
+/* Input boxes */
+.cur-input{display:flex;gap:6px;justify-content:center;margin-bottom:10px;flex-wrap:nowrap;}
+.i-box{
+  width:56px;height:64px;background:var(--panel);border:2px solid var(--border);
+  border-radius:var(--r);font-family:'Orbitron',sans-serif;font-size:26px;font-weight:700;
+  color:var(--white);display:flex;align-items:center;justify-content:center;
+  transition:border-color var(--tr),box-shadow var(--tr);flex-shrink:0;
+}
+/* Smart 6-digit: kotak lebih kecil */
+.i-box.sm{width:40px;height:54px;font-size:19px;}
+
+/* Active states per mode */
+.i-box.act-classic{border-color:var(--green);box-shadow:0 0 10px var(--green-dim);}
+.i-box.act-fight{border-color:var(--gold);box-shadow:0 0 10px rgba(232,200,74,.15);}
+.i-box.act-smart{border-color:var(--red);box-shadow:0 0 10px rgba(232,74,74,.10);}
+
+/* Filled box */
+.i-box.filled{border-color:var(--dim);}
+
+/* Smart mode filled: red tint */
+.i-box.filled-smart{
+  border-color:rgba(232,74,74,.35);
+  background:rgba(232,74,74,.04);
+  color:var(--red);
+}
+
+.i-box.locked{border-color:var(--teal);animation:lock-pop .2s ease;}
+.i-box.shake{border-color:var(--red);animation:shake .3s ease;}
+@keyframes lock-pop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.cursor-blink{width:2px;height:26px;animation:blink .8s infinite;}
+.cursor-blink.classic{background:var(--green);}
+.cursor-blink.fight{background:var(--gold);}
+.cursor-blink.smart{background:var(--red);}
+
+/* Numpad */
+.numpad{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:6px;}
+.n-btn{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  color:var(--white);font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;
+  padding:13px 6px;cursor:pointer;text-align:center;user-select:none;transition:background var(--tr);
+}
+.n-btn:active{background:var(--dim);}
+.n-del{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;color:var(--red);border-color:rgba(232,74,74,.2);}
+.pre-submit-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.action-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.n-sub{
+  background:var(--gold);color:var(--black);border-color:var(--gold);
+  font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;
+  border-radius:var(--r);padding:13px 6px;cursor:pointer;
+}
+.n-sub:disabled{background:var(--dim);color:var(--muted);border-color:var(--dim);cursor:not-allowed;}
+.n-clear{background:transparent;border:1px solid var(--border);color:var(--sub);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;border-radius:var(--r);padding:13px 6px;cursor:pointer;}
+.n-clear:active{border-color:var(--gold);}
+.n-hint-btn{background:transparent;border:1px solid rgba(74,232,200,.2);color:var(--teal);font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:.5px;border-radius:var(--r);padding:13px 6px;cursor:pointer;transition:background var(--tr);}
+.n-hint-btn:active{background:var(--teal-dim);}
+.n-hint-btn:disabled{color:var(--muted);border-color:var(--border);cursor:not-allowed;}
+.n-surrender{background:transparent;border:1px solid rgba(232,74,74,.15);color:var(--sub);font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:.5px;border-radius:var(--r);padding:13px 6px;cursor:pointer;transition:color var(--tr),border-color var(--tr);}
+.n-surrender:active{color:var(--red);border-color:rgba(232,74,74,.4);}
+
+/* ════════════════════════════════════════
+   FLASH OVERLAY (fight)
+════════════════════════════════════════ */
+#flash-overlay{background:#000;gap:8px;}
+.flash-digits{display:flex;gap:14px;}
+.flash-d{font-family:'Orbitron',sans-serif;font-size:clamp(44px,15vw,70px);font-weight:900;color:#fff;line-height:1;text-shadow:0 0 30px rgba(255,255,255,.2);}
+.flash-scores{display:flex;gap:48px;}
+.flash-score-block{text-align:center;}
+.flash-num-dot{font-family:'Orbitron',sans-serif;font-size:clamp(52px,18vw,82px);font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 40px rgba(232,200,74,.45);}
+.flash-num-fame{font-family:'Orbitron',sans-serif;font-size:clamp(52px,18vw,82px);font-weight:900;color:var(--teal);line-height:1;text-shadow:0 0 40px rgba(74,232,200,.45);}
+.flash-lbl{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:4px;color:#333;}
+.flash-bar{position:absolute;bottom:0;left:0;height:3px;background:var(--gold);}
+
+/* ════════════════════════════════════════
+   DIALOGS
+════════════════════════════════════════ */
+.dialog-box{width:100%;max-width:340px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px 22px;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.dialog-title{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:var(--white);margin-bottom:12px;}
+.dialog-body{font-size:14px;color:var(--sub);line-height:1.7;margin-bottom:28px;}
+.dialog-body em{color:var(--text);font-style:normal;}
+.dialog-actions{display:flex;flex-direction:column;gap:8px;width:100%;}
+.btn-back{background:transparent;border:1px solid var(--border);color:var(--text);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;border-radius:var(--r);padding:14px;cursor:pointer;transition:border-color var(--tr);}
+.btn-back:active{border-color:var(--gold);}
+.btn-danger{background:rgba(232,74,74,.08);border:1px solid rgba(232,74,74,.3);color:var(--red);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;border-radius:var(--r);padding:14px;cursor:pointer;}
+.btn-danger:active{background:rgba(232,74,74,.2);}
+
+/* ════════════════════════════════════════
+   RESULT SCREEN
+════════════════════════════════════════ */
+#s-result{align-items:center;justify-content:flex-start;overflow-y:auto;padding:0;}
+.result-content{display:flex;flex-direction:column;align-items:center;padding:40px 24px 32px;width:100%;}
+.res-eyebrow{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--muted);margin-bottom:10px;}
+.res-verdict{font-family:'Orbitron',sans-serif;font-size:clamp(24px,8vw,38px);font-weight:900;color:var(--green);text-align:center;margin-bottom:6px;}
+.res-verdict.sur{color:var(--red);}
+.res-code-line{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--muted);margin-bottom:28px;}
+.res-code-line span{color:var(--gold);}
+.score-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:24px;width:100%;max-width:300px;margin-bottom:18px;text-align:center;}
+.sc-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);margin-bottom:6px;}
+.sc-val{font-family:'Orbitron',sans-serif;font-size:52px;font-weight:900;color:var(--gold);line-height:1;margin-bottom:4px;}
+.sc-val.neg{color:var(--red);}
+.sc-grade{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--sub);margin-bottom:18px;}
+.sc-breakdown{display:flex;justify-content:space-around;border-top:1px solid var(--border);padding-top:16px;gap:6px;}
+.sc-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.sc-iv{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;color:var(--white);}
+.sc-il{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
+.analysis-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:18px;width:100%;max-width:300px;margin-bottom:16px;}
+.analysis-title{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);margin-bottom:14px;}
+.analysis-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
+.analysis-row:last-child{border-bottom:none;}
+.ar-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--sub);}
+.ar-val{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--white);}
+.ar-val.gold{color:var(--gold);}
+.ar-val.teal{color:var(--teal);}
+.ar-val.green{color:var(--green);}
+.topscore-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:18px;width:100%;max-width:300px;margin-bottom:16px;}
+.topscore-title{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);margin-bottom:12px;}
+.ts-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);}
+.ts-row:last-child{border-bottom:none;}
+.ts-rank{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);width:16px;}
+.ts-score{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;flex:1;}
+.ts-score.r1{color:var(--gold);}
+.ts-score.r2{color:var(--white);}
+.ts-score.r3{color:var(--teal);}
+.ts-score.rx{color:var(--sub);}
+.ts-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);}
+.ts-new{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);border:1px solid rgba(232,200,74,.3);border-radius:2px;padding:2px 5px;}
+.sur-msg{font-size:13px;color:var(--sub);line-height:1.8;max-width:300px;text-align:center;margin-bottom:16px;}
+.sur-msg em{color:var(--text);font-style:normal;}
+.sur-msg strong{color:var(--gold);}
+.res-btns{display:flex;flex-direction:column;gap:8px;width:100%;max-width:300px;}
+.btn-sec{background:transparent;border:1px solid var(--border);color:var(--text);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;border-radius:var(--r);padding:15px;cursor:pointer;}
+.btn-sec:active{border-color:var(--gold);}
+
+/* ════════════════════════════════════════
+   MENU & FULLSCREEN OVERLAYS
+════════════════════════════════════════ */
+.menu-panel{background:var(--panel);border-right:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:0 0 var(--r-lg) 0;padding:20px 0;min-width:220px;width:min(94vw,380px);max-height:88vh;overflow-y:auto;position:relative;z-index:1;}
+.menu-sub{display:none;padding:6px 18px 18px;}
+.menu-hdr{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);padding:0 20px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+.menu-item{display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--text);transition:background var(--tr);}
+.menu-item:active{background:var(--dim);color:var(--gold);}
+.menu-icon{font-size:16px;width:20px;text-align:center;}
+
+.fs-header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);background:var(--black);position:sticky;top:0;z-index:1;}
+.fs-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--white);}
+.btn-close{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:3px;padding:7px 12px;cursor:pointer;}
+.btn-close:active{border-color:var(--gold);}
+.fs-body{flex:1;overflow-y:auto;padding:20px;}
+
+/* How to content */
+.hw-section{margin-bottom:26px;}
+.hw-eye{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gold);margin-bottom:10px;}
+.hw-p{font-size:14px;color:var(--text);line-height:1.8;}
+.hw-p em{color:var(--gold);font-style:normal;}
+.hw-p strong{color:var(--white);}
+.hw-ex{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin:12px 0;}
+.hw-ex-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;}
+.hw-ex-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.hw-ex-d{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;width:26px;text-align:center;}
+.hw-ex-d.n{color:var(--white);}
+.hw-ex-d.f{color:var(--teal);}
+.hw-ex-d.d{color:var(--sub);}
+.hw-ex-r{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--sub);margin-left:6px;}
+.hw-divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.hw-mode{border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+.hw-mode.smart{border-color:rgba(232,74,74,.3);background:rgba(232,74,74,.04);}
+.hw-mode-title{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--white);margin-bottom:6px;}
+.hw-mode-title.smart{color:var(--red);}
+.hw-mode-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+.hint-steps{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.hint-step{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;}
+.hs-num{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--gold);width:16px;flex-shrink:0;}
+.hs-txt{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text);flex:1;display:flex;align-items:center;justify-content:space-between;}
+.hs-tag{font-size:8px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);border-radius:2px;padding:2px 5px;}
+
+/* ════════════════════════════════════════
+   RIWAYAT OVERLAY  (statistik + log)
+════════════════════════════════════════ */
+/* Filter tabs */
+.filter-tabs{display:flex;gap:6px;padding:14px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.ftab{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--muted);border:1px solid var(--border);border-radius:3px;
+  padding:6px 10px;cursor:pointer;transition:color var(--tr),border-color var(--tr);
+}
+.ftab.active{color:var(--gold);border-color:rgba(232,200,74,.35);}
+.ftab:active{color:var(--gold);}
+
+/* Stats grid cards */
+.rw-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.rw-stat-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:6px;}
+.rw-stat-card.wide{grid-column:1/-1;}
+.rw-stat-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);}
+.rw-stat-val{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;color:var(--white);line-height:1;}
+.rw-stat-val.gold{color:var(--gold);}
+.rw-stat-val.green{color:var(--green);}
+.rw-stat-val.teal{color:var(--teal);}
+.rw-stat-val.red{color:var(--red);}
+
+/* Winrate bar */
+.wr-bar-wrap{height:4px;background:var(--dim);border-radius:2px;margin-top:6px;}
+.wr-bar{height:4px;background:var(--green);border-radius:2px;transition:width .5s ease;}
+
+/* Log list */
+.rw-log-body{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px;}
+.rw-empty{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-align:center;padding:32px;}
+.rw-log-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r);}
+.rw-icon{font-size:14px;width:18px;text-align:center;}
+.rw-body{flex:1;}
+.rw-score{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--gold);}
+.rw-score.neg{color:var(--red);}
+.rw-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;}
+.rw-result{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;}
+.rw-result.win{color:var(--green);}
+.rw-result.sur{color:var(--gold);}
+.rw-result.lose{color:var(--red);}
+
+/* Review overlay */
+.review-body{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px;}
+.review-secret{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:3px;color:var(--gold);text-align:center;padding:12px;background:var(--gold-dim);border:1px solid rgba(232,200,74,.2);border-radius:var(--r);margin-bottom:4px;}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--black);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+@media(max-width:360px){
+  .i-box{width:46px;height:56px;font-size:20px;}
+  .i-box.sm{width:32px;height:48px;font-size:15px;}
+  .n-btn{padding:11px 4px;font-size:15px;}
+  .logo-master,.logo-cipher{font-size:32px;}
+}
+</style>
+</head>
+<body>
+<audio id="bg-music" loop>
+<source src="audio/audio/menu_music.mp4" type="audio/mp4">
+</audio>
+
+
+<!-- ════════════════════════════════════
+     HOME
+════════════════════════════════════ -->
+<div id="s-home" class="screen active">
+  <div class="home-grid"></div>
+  <div class="home-scanline"></div>
+
+  <div class="home-hdr">
+    <button class="btn-menu" onclick="openMenu()">
+      <div class="menu-pip"></div><div class="menu-pip"></div><div class="menu-pip"></div>
+    </button>
+    <span class="home-ver">v_RGB</span>
+  </div>
+
+  <div class="home-eyebrow">CRACK THE CODE</div>
+  <div class="home-logo">
+    <span class="logo-master">MASTER</span>
+    <span class="logo-cipher">CIPHER</span>
+  </div>
+  <div class="home-tagline"></div>
+
+  <div class="mode-cards">
+    <div class="mode-card sel" data-mode="classic" onclick="selectMode('classic')">
+      <div class="mc-accent"></div>
+      <div class="mc-body">
+        <div class="mc-top"><div class="mc-title">CLASSIC MODE</div><div class="mc-tag">STANDARD</div></div>
+        <div class="mc-sub">4 digit · DOT &amp; FAME</div>
+      </div>
+    </div>
+    <div class="mode-card" data-mode="fight" onclick="selectMode('fight')">
+      <div class="mc-accent"></div>
+      <div class="mc-body">
+        <div class="mc-top"><div class="mc-title">FIGHT MODE</div><div class="mc-tag">HARDGAME</div></div>
+        <div class="mc-sub">4 digit · Shadows DOT &amp; FAME</div>
+      </div>
+    </div>
+    <div class="mode-card" data-mode="smart" onclick="selectMode('smart')">
+      <div class="mc-accent"></div>
+      <div class="mc-body">
+        <div class="mc-top"><div class="mc-title">SMART MODE</div><div class="mc-tag">HARDCORE</div></div>
+        <div class="mc-sub">6 digit · AI ASISTANT · Only FAME</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-main" onclick="startGame()">PLAY GAME</button>
+
+  <div class="home-stats">
+    <div class="hs-item"><div class="hs-val" id="hs-played">0</div><div class="hs-lbl">DIMAINKAN</div></div>
+    <div class="hs-item"><div class="hs-val" id="hs-won">0</div><div class="hs-lbl">MENANG</div></div>
+    <div class="hs-item"><div class="hs-val" id="hs-best">—</div><div class="hs-lbl">SKOR TERBAIK</div></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     GAME SCREEN
+════════════════════════════════════ -->
+<div id="s-game" class="screen">
+  <div class="g-header">
+    <div class="gh-left">
+      <span class="gh-badge" id="gh-badge">CLASSIC</span>
+      <span class="gh-title">MASTER CIPHER</span>
+    </div>
+    <div class="gh-right">
+      <div class="stat"><span class="stat-lbl">TEBAKAN</span><span class="stat-val" id="sv-guess">0</span></div>
+      <div class="stat"><span class="stat-lbl">WAKTU</span><span class="stat-val" id="sv-timer">00:00</span></div>
+      <button class="btn-home-game" onclick="confirmGoHome()">⌂</button>
+    </div>
+  </div>
+
+  <div class="score-bar">
+    <div><div class="sb-label">LIVE SCORE</div><div class="sb-score" id="sb-score">1000</div></div>
+    <div class="hint-chip" id="hint-chip" style="display:none">💡 HINT ×<span id="hint-left">3</span></div>
+  </div>
+
+  <div class="mode-banner fight-banner" id="fight-banner" style="display:none">
+    <span class="mb-text">MODE FIGHT · HASIL AKAN HILANG 2–3 DETIK </span>
+    <div class="mb-dot"></div>
+  </div>
+  <div class="mode-banner smart-banner" id="smart-banner" style="display:none">
+    <span class="mb-text">MODE 6 DIGIT · ONLY FAME · DOT TERSEMBUNYI</span>
+    <div class="mb-dot"></div>
+  </div>
+
+  <div class="history" id="history">
+    <div class="h-empty"><div class="h-empty-icon">🔒</div><div class="h-empty-txt">MULAILAH UNTUK MENEBAK</div></div>
+  </div>
+
+  <div class="input-section">
+    <div class="cur-input" id="cur-input"></div>
+    <div class="fd-display" id="fd-display" style="display:none">
+      <div class="fd-item" id="fd-dot-panel">
+        <span class="fd-lbl">DOT</span><span class="fd-val gold" id="fd-dot"></span>
+      </div>
+      <div class="fd-sep" id="fd-sep"></div>
+      <div class="fd-item">
+        <span class="fd-lbl">FAME</span><span class="fd-val" id="fd-fame"></span>
+      </div>
+    </div>
+    <div class="numpad">
+      <button class="n-btn" onclick="pressNum(1)">1</button>
+      <button class="n-btn" onclick="pressNum(2)">2</button>
+      <button class="n-btn" onclick="pressNum(3)">3</button>
+      <button class="n-btn" onclick="pressNum(4)">4</button>
+      <button class="n-btn" onclick="pressNum(5)">5</button>
+      <button class="n-btn" onclick="pressNum(6)">6</button>
+      <button class="n-btn" onclick="pressNum(7)">7</button>
+      <button class="n-btn" onclick="pressNum(8)">8</button>
+      <button class="n-btn" onclick="pressNum(9)">9</button>
+      <button class="n-btn" onclick="pressNum(0)">0</button>
+      <button class="n-btn n-del" onclick="pressDelete()">⌫</button>
+    </div>
+    <div class="pre-submit-row" id="row-pre">
+      <button class="n-btn n-clear" onclick="clearInput()">HAPUS</button>
+      <button class="n-btn n-sub" id="sub-btn" onclick="submitGuess()" disabled>TEBAK</button>
+    </div>
+    <div class="action-row" id="row-post" style="display:none">
+      <button class="n-btn n-hint-btn" id="hint-btn" onclick="useHint()" disabled>HINT</button>
+      <button class="n-btn n-sub" id="sub-btn2" onclick="submitGuess()" disabled>TEBAK</button>
+      <button class="n-btn n-surrender" onclick="openSurrender()">MENYERAH</button>
+    </div>
+  </div>
+</div>
+
+<!-- Flash -->
+<div id="flash-overlay" class="overlay" style="background:#000;">
+  <div class="flash-digits" id="flash-digits"></div>
+  <div class="flash-scores">
+    <div class="flash-score-block"><div class="flash-num-dot" id="fl-dot">0</div><div class="flash-lbl">DOT</div></div>
+    <div class="flash-score-block"><div class="flash-num-fame" id="fl-fame">0</div><div class="flash-lbl">FAME</div></div>
+  </div>
+  <div class="flash-bar" id="flash-bar" style="width:100%;transition:none;"></div>
+</div>
+
+<!-- Surrender -->
+<div id="surrender-overlay" class="overlay">
+  <div class="dialog-box">
+    <div class="dialog-title">Yakin Menyerah?</div>
+    <div class="dialog-body" id="sur-body">...</div>
+    <div class="dialog-actions">
+      <button class="btn-back" onclick="closeSurrender()">LANJUT BERPIKIR</button>
+      <button class="btn-danger" onclick="confirmSurrender()">LANJUT MENYERAH</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Home -->
+<div id="confirm-home-overlay" class="overlay">
+  <div class="dialog-box">
+    <div class="dialog-title">Keluar Game?</div>
+    <div class="dialog-body">Progress game ini akan hilang.<br>Kode rahasia tidak akan disimpan.</div>
+    <div class="dialog-actions">
+      <button class="btn-back" onclick="hideOverlay('confirm-home-overlay')">PLAY TO GAME</button>
+      <button class="btn-danger" onclick="hideOverlay('confirm-home-overlay');goHome()">GO IN`HOME</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     RESULT
+════════════════════════════════════ -->
+<div id="s-result" class="screen">
+  <div class="result-content">
+    <div class="res-eyebrow" id="res-eyebrow">GAME SELESAI</div>
+    <div class="res-verdict" id="res-verdict">BERHASIL! 🎉</div>
+    <div class="res-code-line">KODE: <span id="res-code">????</span></div>
+    <div class="score-card">
+      <div class="sc-lbl">TOTAL POIN</div>
+      <div class="sc-val" id="res-score">0</div>
+      <div class="sc-grade" id="res-grade">—</div>
+      <div class="sc-breakdown">
+        <div class="sc-item"><span class="sc-iv" id="res-g">—</span><span class="sc-il">TEBAKAN</span></div>
+        <div class="sc-item"><span class="sc-iv" id="res-t">—</span><span class="sc-il">WAKTU</span></div>
+        <div class="sc-item"><span class="sc-iv" id="res-m">—</span><span class="sc-il">MODE</span></div>
+      </div>
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-title">ANALISIS PERMAINAN</div>
+      <div class="analysis-row"><span class="ar-lbl">FAME TERTINGGI</span><span class="ar-val teal" id="ar-maxfame">—</span></div>
+      <div class="analysis-row"><span class="ar-lbl">BONUS FAME</span><span class="ar-val green" id="ar-famebonus">—</span></div>
+      <div class="analysis-row"><span class="ar-lbl">HINT DIPAKAI</span><span class="ar-val" id="ar-hints">—</span></div>
+      <div class="analysis-row"><span class="ar-lbl">EFISIENSI</span><span class="ar-val gold" id="ar-eff">—</span></div>
+    </div>
+    <div class="topscore-card">
+      <div class="topscore-title">TOP SKOR</div>
+      <div id="topscore-list"></div>
+    </div>
+    <div class="sur-msg" id="sur-msg" style="display:none"></div>
+    <div class="res-btns">
+      <button class="btn-main" onclick="goHome()">MAIN LAGI DERR</button>
+      <button class="btn-sec" onclick="openResultReview()">LIHAT RIWAYAT TEBAKAN</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MENU OVERLAY
+════════════════════════════════════ -->
+<div id="menu-overlay" class="overlay" style="align-items:flex-start;justify-content:flex-start;padding:0;background:rgba(6,6,6,.92);">
+  <div style="position:absolute;inset:0;" onclick="closeMenu()"></div>
+  <div class="menu-panel">
+    <div class="menu-hdr">MASTER CIPHER</div>
+    <div class="menu-item" onclick="closeMenu();goHome()"><span class="menu-icon">⌂</span>HOME</div>
+    <div class="menu-item" onclick="closeMenu();setTimeout(()=>showOverlay('howto-overlay'),250)"><span class="menu-icon">📖</span>CARA BERMAIN</div>
+    <div class="menu-item" onclick="closeMenu();setTimeout(()=>openRiwayat(),250)"><span class="menu-icon">📊</span>RIWAYAT &amp; STATISTIK</div>
+  </div>
+</div>
+<div id="howto-overlay" class="overlay overlay-fs" style="background:rgba(6,6,6,.97);">
+  <div class="fs-header">
+    <span class="fs-title">CARA BERMAIN</span>
+    <button class="btn-close" onclick="hideOverlay('howto-overlay')">TUTUP</button>
+  </div>
+  <div class="fs-body">
+    <div class="hw-section">
+      <div class="hw-eye">KONSEP DASAR</div>
+      <p class="hw-p"><strong>Master Cipher</strong> adalah permainan deduksi angka. Sistem menyembunyikan kode rahasia. Semua angkanya unik, Tugasmu adalah memecahkan kombinasi tersebut hanya dari umpan balik dari tiap tebakan.</p>
+    </div>
+    <div class="hw-section">
+      <div class="hw-eye">DOT &amp; FAME</div>
+      <p class="hw-p"><em>DOT</em> = angka benar, posisi salah.<br><em>FAME</em> = angka benar, posisi tepat.<br><br>Capai FAME penuh untuk menang.</p>
+    </div>
+    <div class="hw-section">
+      <div class="hw-eye">MODE PERMAINAN</div>
+      <div class="hw-mode">
+        <div class="hw-mode-title" style="color:var(--green);">🧩 CLASSIC</div>
+        <div class="hw-mode-desc">4 digit unik. DOT &amp; FAME <strong style="color:var(--gold);">tersimpan di riwayat</strong>. Penalti −25 poin/tebakan.</div>
+      </div>
+      <div class="hw-mode">
+        <div class="hw-mode-title" style="color:var(--gold);">⚔️ FIGHT MODE</div>
+        <div class="hw-mode-desc">4 digit unik. Hasil DOT &amp; FAME hanya <strong style="color:var(--green);">muncul 2–3 detik</strong> lalu hilang. Penalti −15/tebakan.</div>
+      </div>
+      <div class="hw-mode smart">
+        <div class="hw-mode-title smart">🧠 SMART MODE</div>
+        <div class="hw-mode-desc">6 digit unik. Hanya <strong style="color:var(--red);">FAME</strong> yang ditampilkan. Penalti −10/tebakan.</div>
+      </div>
+    </div>
+    <div class="hw-section">
+      <div class="hw-eye">HINT (ditiadakan di SMART MODE)</div>
+      <p class="hw-p">Tersedia <em>3 hint</em> per permainan, penalti <em>−100 poin</em> tiap penggunaan:</p>
+      <div class="hint-steps">
+        <div class="hint-step"><span class="hs-num">1</span><span class="hs-txt">Ganjil / Genap digit tertentu <span class="hs-tag">AMBIGU</span></span></div>
+        <div class="hint-step"><span class="hs-num">2</span><span class="hs-txt">Angka yang ada di kode <span class="hs-tag">SEDANG</span></span></div>
+        <div class="hint-step"><span class="hs-num">3</span><span class="hs-txt">Posisi pasti sebuah digit <span class="hs-tag">KUAT</span></span></div>
+      </div>
+    </div>
+    <div class="hw-section">
+      <div class="hw-eye">SISTEM SKOR</div>
+      <p class="hw-p">
+        Base <em>1000</em>.<br>
+        − Waktu: <em>−0.5 poin/dtk</em><br>
+        − Classic: <em>−25/tebakan</em> · Fight: <em>−15/tebakan</em> · Smart: <em>−10/tebakan</em><br>
+        − Hint: <em>−100/penggunaan</em><br>
+        Bonus milestone FAME: <em>+5, +10, +20</em>
+      </p>
+    </div>
+  </div>
+</div>
+<!-- ════════════════════════════════════
+     RIWAYAT & STATISTIK OVERLAY
+════════════════════════════════════ -->
+<div id="riwayat-overlay" class="overlay overlay-fs" style="background:rgba(6,6,6,.97);">
+  <div class="fs-header">
+    <span class="fs-title">RIWAYAT &amp; STATISTIK</span>
+   <button class="btn-close" onclick="hideOverlay('riwayat-overlay')">TUTUP</button>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    <div class="ftab active" data-filter="today" onclick="setFilter(this,'today')">HARI INI</div>
+    <div class="ftab" data-filter="7d"    onclick="setFilter(this,'7d')">7 HARI</div>
+    <div class="ftab" data-filter="30d"   onclick="setFilter(this,'30d')">30 HARI</div>
+    <div class="ftab" data-filter="all"   onclick="setFilter(this,'all')">SEMUA</div>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="rw-stats" id="rw-stats"></div>
+
+  <!-- Log list -->
+  <div class="rw-log-body" id="rw-log-body"></div>
+</div>
+
+<!-- ════════════════════════════════════
+     REVIEW TEBAKAN OVERLAY
+════════════════════════════════════ -->
+<div id="review-overlay" class="overlay overlay-fs" style="background:rgba(6,6,6,.97);">
+  <div class="fs-header">
+    <span class="fs-title">RIWAYAT TEBAKAN</span>
+    <button class="btn-close" onclick="closeReview()">TUTUP</button>
+  </div>
+  <div class="review-body" id="review-body"></div>
+</div>
+
+<!-- ════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════ -->
+<script>
+/* ── MODE CONFIG ───────────────────────────────
+   Tambah mode baru cukup di sini */
+const MODE_CONFIG = {
+  classic:{ digits:4, showDot:true,  gPenalty:25, label:'CLASSIC',      badgeClass:'',           icon:'🧩', winFame:4 },
+  fight:  { digits:4, showDot:true,  gPenalty:15, label:'FIGHT MODE ⚔️', badgeClass:'mode-fight', icon:'⚔️', winFame:4 },
+  smart:  { digits:6, showDot:false, gPenalty:10, label:'SMART MODE 🧠', badgeClass:'mode-smart', icon:'🧠', winFame:6 }
+};
+
+/* ── STATE ─────────────────────────────────── */
+const G = {
+  mode:'classic', secret:[], input:[], history:[],
+  guessCount:0, elapsed:0, timerInterval:null,
+  gameStarted:false, gameOver:false,
+  hintLeft:3, hintUsed:0,
+  fameBonus:0, maxFameReached:0
+};
+const cfg = ()=> MODE_CONFIG[G.mode];
+
+/* ── UTILS ─────────────────────────────────── */
+function genSecret(n){
+  const d=[0,1,2,3,4,5,6,7,8,9];
+  for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}
+  return d.slice(0,n);
+}
+function calcDF(secret,guess){
+  const n=secret.length;let dot=0,fame=0;
+  const su=Array(n).fill(false),gu=Array(n).fill(false);
+  for(let i=0;i<n;i++)if(guess[i]===secret[i]){fame++;su[i]=gu[i]=true;}
+  for(let i=0;i<n;i++){if(gu[i])continue;for(let j=0;j<n;j++){if(su[j])continue;if(guess[i]===secret[j]){dot++;su[j]=gu[i]=true;break;}}}
+  return{dot,fame};
+}
+function fmtTime(s){
+  if(s==null)return'--:--';
+  return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+}
+function fmtDate(ts){
+  return new Date(ts).toLocaleDateString('id-ID',{day:'2-digit',month:'short'});
+}
+
+/* ── SCORE ─────────────────────────────────── */
+function calcScore(guesses,elapsed,hintUsed,mode,fameBonus){
+  const c=MODE_CONFIG[mode];
+  return Math.max(1,Math.round(1000-(c.gPenalty*guesses)-Math.floor(elapsed*.5)-(hintUsed*100)+(fameBonus||0)));
+}
+function calcLiveScore(){
+  if(!G.gameStarted||G.guessCount===0)return 1000;
+  return calcScore(G.guessCount,G.elapsed,G.hintUsed,G.mode,G.fameBonus);
+}
+function calcSurrScore(g){return Math.min(-100,-1000+(g*40));}
+
+function getGrade(s){
+  if(s>=900)return'⚡ MASTERMIND';
+  if(s>=800)return'🧠 AHLI LOGIKA';
+  if(s>=700)return'🔍 ANALIS ELIT';
+  if(s>=600)return'♟️ STRATEGIS';
+  if(s>=500)return'🕵️ INVESTIGATOR';
+  if(s>=400)return'📋 PENELITI';
+  if(s>=300)return'👁️ PENGAMAT';
+  if(s>=200)return'🌱 PEMULA';
+  return'🐒 SIMPANSE';
+}
+function getSurrGrade(s){
+  if(s>=-199)return'HAMPIR MENEMUKAN POLA';
+  if(s>=-399)return'KEHILANGAN JEJAK';
+  if(s>=-599)return'TERSESAT DALAM DEDUKSI';
+  return'SIMPANSE MENYERAH';
+}
+function getSurrMsg(s,g,mf){
+  if(mf>=cfg().winFame-1)return`Kamu pernah berada <em>sangat dekat</em>.<br><br>Ironisnya, langkah berikutnya mungkin cukup.<br><em>Tapi kamu memilih untuk tidak mengambilnya.</em>`;
+  if(s>=-199)return`Kamu menyerah terlalu cepat.<br><br><em>Masalahnya ada di kepercayaan dirimu, bukan di angkanya.</em>`;
+  if(s>=-399)return`Deduksi dihentikan.<br><br><em>Setengah jalan bukan sebuah pencapaian.</em>`;
+  return`Tersesat di antara ${g} tebakan yang tidak menghasilkan apa-apa.<br><em>Lain kali, jangan biarkan angka menang begitu saja.</em>`;
+}
+
+/* ── LOCAL STORAGE ─────────────────────────── */
+const LS_LOG='mc_log', LS_SCORES='mc_scores';
+function loadLog(){try{return JSON.parse(localStorage.getItem(LS_LOG))||[];}catch(e){return[];}}
+function addLog(entry){
+  let l=loadLog();l.push(entry);if(l.length>200)l=l.slice(-200);
+  try{localStorage.setItem(LS_LOG,JSON.stringify(l));}catch(e){}
+}
+function loadScores(){try{return JSON.parse(localStorage.getItem(LS_SCORES))||[];}catch(e){return[];}}
+function addScore(entry){
+  let s=loadScores();s.push(entry);s.sort((a,b)=>b.score-a.score);s=s.slice(0,5);
+  try{localStorage.setItem(LS_SCORES,JSON.stringify(s));}catch(e){}
+  return s;
+}
+
+function filterLog(logs,filter){
+  const now=Date.now(),day=86400000;
+  if(filter==='today') return logs.filter(l=>(now-l.ts)<day);
+  if(filter==='7d')    return logs.filter(l=>(now-l.ts)<day*7);
+  if(filter==='30d')   return logs.filter(l=>(now-l.ts)<day*30);
+  return logs;
+}
+
+function renderHomeStats(){
+  const logs=loadLog();
+  const sc=loadScores();
+  const el=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  el('hs-played',logs.length);
+  el('hs-won',logs.filter(l=>l.won).length);
+  el('hs-best',sc.length>0?sc[0].score:'—');
+}
+
+/* ── OVERLAY ───────────────────────────────── */
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showOverlay(id){const e=document.getElementById(id);if(!e)return;e.style.display='flex';requestAnimationFrame(()=>e.classList.add('show'));}
+function hideOverlay(id){const e=document.getElementById(id);if(!e)return;e.classList.remove('show');setTimeout(()=>{if(!e.classList.contains('show'))e.style.display='none';},220);}
+
+/* ── MENU / HOWTO / RIWAYAT ────────────────── */
+function openMenu(){showOverlay('menu-overlay');}
+function closeMenu(){
+  hideOverlay('menu-overlay');
+}
+function closeHowTo(){hideOverlay('howto-overlay');}
+let currentFilter='today';
+function openRiwayat(){
+  currentFilter='today';
+  document.querySelectorAll('#riwayat-overlay .ftab').forEach(t=>t.classList.toggle('active',t.dataset.filter==='today'));
+  renderRiwayat('today');
+  showOverlay('riwayat-overlay');
+}
+function setFilter(el,filter){
+  currentFilter=filter;
+  const container=el.closest('.filter-tabs').parentElement;
+  container.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderRiwayat(filter);
+}
+
+function renderRiwayat(filter){
+  const all=loadLog();
+  const logs=filterLog(all,filter);
+
+  /* Stats */
+  const played=logs.length;
+  const won=logs.filter(l=>l.won).length;
+  const loses=logs.filter(l=>!l.won&&!l.surrendered).length;
+  const surrendered=logs.filter(l=>l.surrendered).length;
+  const wr=played>0?Math.round((won/played)*100):0;
+  const guessArr=logs.filter(l=>l.won).map(l=>l.guesses);
+  const avgGuess=guessArr.length>0?(guessArr.reduce((a,b)=>a+b,0)/guessArr.length).toFixed(1):'—';
+  const bestInFilter=logs.filter(l=>l.won).sort((a,b)=>b.score-a.score)[0];
+
+  document.getElementById('rw-stats').innerHTML=`
+    <div class="rw-stat-card">
+      <div class="rw-stat-label">TOTAL GAME</div>
+      <div class="rw-stat-val gold">${played}</div>
+    </div>
+    <div class="rw-stat-card">
+      <div class="rw-stat-label">MENANG</div>
+      <div class="rw-stat-val green">${won}</div>
+    </div>
+    <div class="rw-stat-card">
+      <div class="rw-stat-label">KALAH</div>
+      <div class="rw-stat-val red">${loses}</div>
+    </div>
+    <div class="rw-stat-card">
+      <div class="rw-stat-label">MENYERAH</div>
+      <div class="rw-stat-val" style="color:var(--gold)">${surrendered}</div>
+    </div>
+    <div class="rw-stat-card wide">
+      <div class="rw-stat-label">WIN RATE</div>
+      <div class="rw-stat-val teal">${wr}%</div>
+      <div class="wr-bar-wrap"><div class="wr-bar" style="width:${wr}%"></div></div>
+    </div>
+    <div class="rw-stat-card">
+      <div class="rw-stat-label">RATA-RATA TEBAKAN</div>
+      <div class="rw-stat-val">${avgGuess}</div>
+    </div>
+    <div class="rw-stat-card">
+      <div class="rw-stat-label">SKOR TERBAIK</div>
+      <div class="rw-stat-val gold">${bestInFilter?bestInFilter.score:'—'}</div>
+    </div>
+  `;
+
+  /* Log */
+  const body=document.getElementById('rw-log-body');
+  if(logs.length===0){body.innerHTML=`<div class="rw-empty">BELUM ADA RIWAYAT</div>`;return;}
+  const modeIcon={'classic':'🧩','fight':'⚔️','smart':'🧠'};
+  body.innerHTML=[...logs].reverse().map(l=>`
+    <div class="rw-log-row">
+      <span class="rw-icon">${modeIcon[l.mode]||'🎮'}</span>
+      <div class="rw-body">
+        <div class="rw-score${l.score<0?' neg':''}">${l.score}</div>
+        <div class="rw-meta">${l.guesses}× · ${fmtTime(l.elapsed)} · ${fmtDate(l.ts)}</div>
+      </div>
+      <span class="rw-result ${l.won?'win':l.surrendered?'sur':'lose'}">${l.won?'MENANG':l.surrendered?'MENYERAH':'KALAH'}</span>
+    </div>
+  `).join('');
+}
+
+/* ── MODE SELECT ───────────────────────────── */
+function selectMode(m){
+  G.mode=m;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('sel'));
+  document.querySelector(`[data-mode="${m}"]`).classList.add('sel');
+}
+
+/* ── BUILD INPUT BOXES ─────────────────────── */
+function buildInputBoxes(){
+  const n=cfg().digits;
+  const isSmart=G.mode==='smart';
+  const container=document.getElementById('cur-input');
+  container.innerHTML='';
+  for(let i=0;i<n;i++){
+    const div=document.createElement('div');
+    div.id='b'+i;
+    div.className='i-box'+(n===6?' sm':'')+(i===0?' act-'+G.mode:'');
+    if(i===0)div.innerHTML=`<span class="cursor-blink ${G.mode}"></span>`;
+    container.appendChild(div);
+  }
+  // fd-display: smart mode hanya FAME, border hijau
+  const fdDisp=document.getElementById('fd-display');
+  const fdDotPanel=document.getElementById('fd-dot-panel');
+  const fdSep=document.getElementById('fd-sep');
+  const fdFame=document.getElementById('fd-fame');
+  fdDisp.className='fd-display'+(isSmart?' smart-only':'');
+  fdDotPanel.style.display=isSmart?'none':'flex';
+  fdSep.style.display=isSmart?'none':'block';
+  fdFame.className='fd-val'+(isSmart?' green':' teal');
+}
+
+/* ── START GAME ────────────────────────────── */
+function startGame(){
+  document.getElementById('bg-music').pause();
+  const c=cfg();
+  G.secret=genSecret(c.digits);
+  G.input=[];G.history=[];G.guessCount=0;G.elapsed=0;
+  G.gameStarted=false;G.gameOver=false;
+  G.hintLeft=3;G.hintUsed=0;G.fameBonus=0;G.maxFameReached=0;
+  clearInterval(G.timerInterval);
+
+  buildInputBoxes();
+
+  /* badge */
+  const badge=document.getElementById('gh-badge');
+  badge.textContent=c.label;
+  badge.className='gh-badge'+(c.badgeClass?' '+c.badgeClass:'');
+
+  /* banners */
+  document.getElementById('fight-banner').style.display=G.mode==='fight'?'flex':'none';
+  document.getElementById('smart-banner').style.display=G.mode==='smart'?'flex':'none';
+
+  /* score / stats reset */
+  document.getElementById('sb-score').textContent='1000';
+  document.getElementById('sb-score').style.color='var(--gold)';
+  document.getElementById('sv-guess').textContent='0';
+  document.getElementById('sv-timer').textContent='00:00';
+  document.getElementById('sv-timer').classList.remove('urgent');
+
+  /* hint chip */
+  document.getElementById('hint-chip').style.display='none';
+  document.getElementById('hint-left').textContent='3';
+
+  /* rows */
+  document.getElementById('row-pre').style.display='grid';
+  document.getElementById('row-post').style.display='none';
+  document.getElementById('sub-btn').disabled=true;
+  document.getElementById('sub-btn2').disabled=true;
+  document.getElementById('fd-display').style.display='none';
+
+  renderHistory();
+  showScreen('s-game');
+}
+
+function goHome(){
+  clearInterval(G.timerInterval);
+  renderHomeStats();
+  showScreen('s-home');
+  const music=document.getElementById('bg-music');
+  music.currentTime=0;
+  music.play().catch(()=>{});
+}
+function confirmGoHome(){
+  if(!G.gameStarted||G.gameOver){goHome();return;}
+  showOverlay('confirm-home-overlay');
+}
+
+/* ── TIMER ─────────────────────────────────── */
+function startTimer(){
+  const startTime=Date.now()-G.elapsed*1000;
+  G.timerInterval=setInterval(()=>{
+    G.elapsed=Math.floor((Date.now()-startTime)/1000);
+    const el=document.getElementById('sv-timer');
+    el.textContent=fmtTime(G.elapsed);
+    if(G.elapsed>240)el.classList.add('urgent');
+    updateLiveScore();
+  },1000);
+}
+
+/* ── INPUT ─────────────────────────────────── */
+function pressNum(n){
+  if(G.gameOver)return;
+  const max=cfg().digits;
+  if(G.input.length>=max)return;
+  if(G.input.includes(n)){shakeBox(G.input.length);return;}
+  G.input.push(n);renderInput();lockBox(G.input.length-1);
+  const full=G.input.length===max;
+  document.getElementById('sub-btn').disabled=!full;
+  document.getElementById('sub-btn2').disabled=!full;
+}
+function pressDelete(){if(G.input.length===0)return;G.input.pop();renderInput();document.getElementById('sub-btn').disabled=true;document.getElementById('sub-btn2').disabled=true;}
+function clearInput(){G.input=[];renderInput();document.getElementById('sub-btn').disabled=true;document.getElementById('sub-btn2').disabled=true;}
+function shakeBox(i){const el=document.getElementById('b'+i);if(!el)return;el.classList.add('shake');setTimeout(()=>el.classList.remove('shake'),350);}
+function lockBox(i){const el=document.getElementById('b'+i);if(!el)return;el.classList.add('locked');setTimeout(()=>el.classList.remove('locked'),250);}
+
+function renderInput(){
+  const n=cfg().digits;const isSmart=G.mode==='smart';
+  for(let i=0;i<n;i++){
+    const el=document.getElementById('b'+i);if(!el)continue;
+    const v=G.input[i];
+    if(v!==undefined){
+      el.textContent=v;
+      el.className='i-box'+(n===6?' sm':'')+(isSmart?' filled-smart':' filled');
+    }else if(i===G.input.length){
+      el.innerHTML=`<span class="cursor-blink ${G.mode}"></span>`;
+      el.className='i-box'+(n===6?' sm':'')+' act-'+G.mode;
+    }else{
+      el.innerHTML='';el.className='i-box'+(n===6?' sm':'');
+    }
+  }
+}
+
+/* ── SUBMIT ────────────────────────────────── */
+function submitGuess(){
+  const n=cfg().digits;
+  if(G.input.length!==n||G.gameOver)return;
+
+  if(!G.gameStarted){
+    G.gameStarted=true;startTimer();
+    document.getElementById('row-pre').style.display='none';
+    document.getElementById('row-post').style.display='grid';
+    document.getElementById('fd-display').style.display=G.mode==='fight'?'none':'flex';
+    if(G.mode!=='smart'){
+      document.getElementById('hint-chip').style.display='flex';
+      document.getElementById('hint-btn').disabled=false;
+    }else{
+      document.getElementById('hint-btn').disabled=true;
+    }
+  }
+
+  const guess=[...G.input];
+  const res=calcDF(G.secret,guess);
+  G.guessCount++;
+
+  /* Fame milestone bonus */
+  const ms=[{l:1,p:5},{l:2,p:10},{l:3,p:20}];
+  let bonusGained=0;
+  if(res.fame>G.maxFameReached&&res.fame<cfg().winFame){
+    ms.forEach(m=>{if(m.l>G.maxFameReached&&m.l<=res.fame){G.fameBonus+=m.p;bonusGained+=m.p;}});
+    G.maxFameReached=res.fame;
+  }
+
+  G.history.push({guess,dot:res.dot,fame:res.fame,isHint:false,bonusGained});
+  document.getElementById('sv-guess').textContent=G.guessCount;
+  if(cfg().showDot)document.getElementById('fd-dot').textContent=res.dot;
+  document.getElementById('fd-fame').textContent=res.fame;
+  clearInput();
+
+  const won=res.fame===cfg().winFame;
+  if(G.mode==='fight'){
+    if(won){clearInterval(G.timerInterval);G.gameOver=true;}
+    showFlash(guess,res,()=>{renderHistory();updateLiveScore();if(won)endGame(true,false);});
+  }else{
+    renderHistory();updateLiveScore();
+    if(won)endGame(true,false);
+  }
+}
+
+/* ── LIVE SCORE ────────────────────────────── */
+function updateLiveScore(){
+  const el=document.getElementById('sb-score');
+  if(!G.gameStarted){el.textContent='1000';el.style.color='var(--gold)';return;}
+  const p=calcLiveScore();
+  el.textContent=p;
+  el.style.color=p>=700?'var(--gold)':p>=400?'var(--teal)':'var(--red)';
+}
+
+/* ── HINT ──────────────────────────────────── */
+function generateHint(){
+  const idx=Math.floor(Math.random()*G.secret.length);
+  const digit=G.secret[idx];
+  const level=G.hintUsed;
+  if(level===0)return`Posisi ke-${idx+1} berisi angka ${digit%2===0?'genap':'ganjil'}.`;
+  if(level===1)return`Angka ${digit} ada di dalam kode rahasia.`;
+  return`Digit ke-${idx+1} adalah angka ${digit}.`;
+}
+function useHint(){
+  if(G.hintLeft<=0||!G.gameStarted||G.gameOver||G.mode==='smart')return;
+  const hint=generateHint();
+  G.hintLeft--;G.hintUsed++;
+  document.getElementById('hint-btn').disabled=G.hintLeft<=0;
+  document.getElementById('hint-left').textContent=G.hintLeft;
+  G.history.push({isHint:true,hintText:hint});
+  renderHistory();updateLiveScore();
+}
+
+/* ── HISTORY ───────────────────────────────── */
+function renderHistory(){
+  const sec=document.getElementById('history');
+  if(G.history.length===0){
+    sec.innerHTML=`<div class="h-empty"><div class="h-empty-icon">🔒</div><div class="h-empty-txt">BELUM ADA TEBAKAN</div></div>`;return;
+  }
+  const isFight=G.mode==='fight', isSmart=G.mode==='smart';
+  let gi=0;
+  sec.innerHTML=G.history.map(h=>{
+    if(h.isHint)return`<div class="h-row" style="border-color:rgba(74,232,200,.2);background:rgba(74,232,200,.04);">
+      <span class="h-hint-tag">HINT −100</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--sub);flex:1;padding-left:8px;">${h.hintText}</span></div>`;
+    gi++;
+    const hideRes=isFight&&!G.gameOver;
+    const bonus=h.bonusGained>0?`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);border:1px solid rgba(74,232,122,.25);border-radius:2px;padding:2px 5px;flex-shrink:0;">+${h.bonusGained}</span>`:'';
+    /* smart: digit class sm, hanya fame */
+    const dClass=isSmart?' smart':'';
+    const resultHtml=isSmart
+      ?`<div class="h-fame-row smart"><span>FAME</span><span class="h-fn">${h.fame}</span></div>`
+      :`<div class="h-dot-row"><span>DOT</span><span class="h-dn">${h.dot}</span></div>
+        <div class="h-fame-row"><span>FAME</span><span class="h-fn">${h.fame}</span></div>`;
+    return`<div class="h-row${hideRes?' fight-hide':''}">
+      <span class="h-idx">${gi}</span>
+      <div class="h-digits">${h.guess.map(d=>`<div class="h-d${dClass}">${d}</div>`).join('')}</div>
+      ${bonus}
+      <div class="h-result${hideRes?' fight-hide':''}">${resultHtml}</div>
+    </div>`;
+  }).join('');
+  sec.scrollTop=sec.scrollHeight;
+}
+
+/* ── FLASH ─────────────────────────────────── */
+function showFlash(guess,res,cb){
+  const ov=document.getElementById('flash-overlay');
+  document.getElementById('flash-digits').innerHTML=guess.map(d=>`<div class="flash-d">${d}</div>`).join('');
+  document.getElementById('fl-dot').textContent=res.dot;
+  document.getElementById('fl-fame').textContent=res.fame;
+  const bar=document.getElementById('flash-bar');
+  bar.style.transition='none';bar.style.width='100%';
+  const dur=2000+Math.random()*1000;
+  showOverlay('flash-overlay');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{bar.style.transition=`width ${dur}ms linear`;bar.style.width='0%';}));
+  setTimeout(()=>{hideOverlay('flash-overlay');setTimeout(cb,150);},dur);
+}
+
+/* ── SURRENDER ─────────────────────────────── */
+function openSurrender(){
+  if(!G.gameStarted||G.gameOver)return;
+  const msgs=[
+    `Kode rahasia belum berhasil dipecahkan.<br><br><em>Banyak pemain menemukan jawabannya setelah satu tebakan lagi.</em>`,
+    `Premis yang ada belum habis dieksplor.<br><br><em>Terkadang satu deduksi terakhir memecahkan seluruh misteri.</em>`,
+    `Setiap pola yang tampak buntu menyimpan celah.<br><br><em>Apakah kamu yakin tidak ada satu tebakan lagi?</em>`
+  ];
+  document.getElementById('sur-body').innerHTML=msgs[Math.floor(Math.random()*msgs.length)];
+  showOverlay('surrender-overlay');
+}
+function closeSurrender(){hideOverlay('surrender-overlay');}
+function confirmSurrender(){
+  hideOverlay('surrender-overlay');
+  G.gameOver=true;clearInterval(G.timerInterval);
+  renderHistory();endGame(false,true);
+}
+
+/* ── END GAME ──────────────────────────────── */
+function endGame(won,surrendered){
+  G.gameOver=true;clearInterval(G.timerInterval);
+  document.getElementById('sub-btn').disabled=true;
+  document.getElementById('sub-btn2').disabled=true;
+
+  const finalScore=surrendered?calcSurrScore(G.guessCount):calcScore(G.guessCount,G.elapsed,G.hintUsed,G.mode,G.fameBonus);
+
+  /* Save log */
+  addLog({mode:G.mode,won,surrendered,score:finalScore,guesses:G.guessCount,elapsed:G.elapsed,hintUsed:G.hintUsed,ts:Date.now()});
+
+  /* Top scores */
+  let scores=loadScores(),isNewRecord=false;
+  if(won){
+    scores=addScore({score:finalScore,guesses:G.guessCount,time:G.elapsed,mode:G.mode});
+    isNewRecord=scores.length>0&&scores[0].score===finalScore;
+  }
+
+  /* Result screen populate */
+  document.getElementById('res-code').textContent=G.secret.join(' · ');
+  document.getElementById('res-g').textContent=G.guessCount+'×';
+  document.getElementById('res-t').textContent=fmtTime(G.elapsed);
+  document.getElementById('res-m').textContent=cfg().icon;
+  const sv=document.getElementById('res-score');
+  sv.textContent=finalScore;sv.className=finalScore<0?'sc-val neg':'sc-val';
+
+  const maxFame=G.history.filter(h=>!h.isHint).reduce((m,h)=>Math.max(m,h.fame),0);
+  document.getElementById('ar-maxfame').textContent=maxFame+' / '+cfg().winFame;
+  document.getElementById('ar-famebonus').textContent=G.fameBonus>0?'+'+G.fameBonus:'—';
+  document.getElementById('ar-hints').textContent=G.mode==='smart'?'N/A':G.hintUsed===0?'Tidak ada':G.hintUsed+'×';
+  const eff=won?Math.max(0,Math.min(100,Math.round((1-(G.guessCount/20))*100))):0;
+  document.getElementById('ar-eff').textContent=won?eff+'%':'—';
+
+  const rc=['r1','r2','r3','rx','rx'];
+  document.getElementById('topscore-list').innerHTML=scores.length===0
+    ?`<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:12px;">BELUM ADA REKOR</div>`
+    :scores.map((s,i)=>`<div class="ts-row">
+        <span class="ts-rank">${i+1}</span>
+        <span class="ts-score ${rc[i]||'rx'}">${s.score}</span>
+        <span class="ts-meta">${s.guesses}× · ${fmtTime(s.time)} · ${MODE_CONFIG[s.mode]?.icon||s.mode}</span>
+        ${isNewRecord&&i===0&&won?'<span class="ts-new">BARU</span>':''}
+      </div>`).join('');
+
+  const surMsg=document.getElementById('sur-msg');
+  if(surrendered){
+    document.getElementById('res-eyebrow').textContent='MENYERAH';
+    document.getElementById('res-verdict').textContent='DEDUKSI DIHENTIKAN';
+    document.getElementById('res-verdict').className='res-verdict sur';
+    document.getElementById('res-grade').textContent=getSurrGrade(finalScore);
+    surMsg.innerHTML=getSurrMsg(finalScore,G.guessCount,maxFame);surMsg.style.display='block';
+  }else{
+    document.getElementById('res-eyebrow').textContent='GAME SELESAI';
+    document.getElementById('res-verdict').textContent='BERHASIL! 🎉';
+    document.getElementById('res-verdict').className='res-verdict';
+    document.getElementById('res-grade').textContent=getGrade(finalScore);
+    surMsg.style.display='none';
+  }
+
+  setTimeout(()=>showScreen('s-result'),300);
+}
+
+/* ── REVIEW ────────────────────────────────── */
+function openResultReview(){buildReview();showOverlay('review-overlay');}
+function closeReview(){hideOverlay('review-overlay');}
+function buildReview(){
+  const body=document.getElementById('review-body');
+  const isSmart=G.mode==='smart';
+  let gi=0;
+  let html=`<div class="review-secret">KODE: ${G.secret.join(' · ')}</div>`;
+  html+=G.history.length===0
+    ?`<div style="text-align:center;padding:32px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);">TIDAK ADA RIWAYAT</div>`
+    :G.history.map(h=>{
+      if(h.isHint)return`<div class="h-row" style="border-color:rgba(74,232,200,.2);background:rgba(74,232,200,.04);"><span class="h-hint-tag">HINT −100</span><span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--sub);flex:1;padding-left:8px;">${h.hintText}</span></div>`;
+      gi++;
+      const resultHtml=isSmart
+        ?`<div class="h-fame-row smart"><span>FAME</span><span class="h-fn">${h.fame}</span></div>`
+        :`<div class="h-dot-row"><span>DOT</span><span class="h-dn">${h.dot}</span></div><div class="h-fame-row"><span>FAME</span><span class="h-fn">${h.fame}</span></div>`;
+      return`<div class="h-row"><span class="h-idx">${gi}</span><div class="h-digits">${h.guess.map(d=>`<div class="h-d${isSmart?' smart':''}">${d}</div>`).join('')}</div><div class="h-result">${resultHtml}</div></div>`;
+    }).join('');
+  body.innerHTML=html;
+}
+
+/* ── INIT ──────────────────────────────────── */
+renderHomeStats();
+
+/* ── SOUND: KLIK/BEEP ──────────────────────── */
+let audioCtx=null;
+function playClick(){
+  try{
+    if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+    osc.type='square';
+    osc.frequency.value=720;
+    gain.gain.value=0.05;
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.08);
+    osc.stop(audioCtx.currentTime+0.08);
+  }catch(e){}
+}
+document.addEventListener('click',function(e){
+  if(e.target.closest('button,.menu-item,.mode-card')){
+    playClick();
+  }
+});
+
+/* ── KEYBOARD ──────────────────────────────── */
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('s-game').classList.contains('active'))return;
+  if(e.key>='0'&&e.key<='9'){e.preventDefault();pressNum(parseInt(e.key));}
+  else if(e.key==='Backspace'){e.preventDefault();pressDelete();}
+  else if(e.key==='Enter'){e.preventDefault();submitGuess();}
+  else if(e.key==='Escape'){e.preventDefault();clearInput();}
+  else if(e.key.length===1&&/[a-zA-Z]/.test(e.key))e.preventDefault();
+});
+function unlockMusic() {
+
+    const music = document.getElementById("bg-music");
+
+    if (!music) return;
+
+    if (music.paused) {
+        music.play().catch(err => {
+            console.log("Autoplay diblokir:", err);
+        });
+    }
+
+    document.removeEventListener("pointerdown", unlockMusic);
+    document.removeEventListener("keydown", unlockMusic);
+
+}
+
+document.addEventListener("pointerdown", unlockMusic, { once: true });
+document.addEventListener("keydown", unlockMusic, { once: true });
+</script>
+</body>
+</html>
