@@ -210,6 +210,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 .h-result{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:72px;}
 .h-dot-row{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);display:flex;align-items:center;gap:5px;}
 .h-fame-row{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--teal);display:flex;align-items:center;gap:5px;}
+
 /* Smart mode: fame row berwarna merah */
 .h-fame-row.smart{color:var(--red);}
 .h-dn,.h-fn{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;}
@@ -698,28 +699,28 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
       </div>
       <div class="hw-mode">
         <div class="hw-mode-title" style="color:var(--gold);">⚔️ FIGHT MODE</div>
-        <div class="hw-mode-desc">4 digit unik. Hasil DOT &amp; FAME hanya <strong style="color:var(--gold);">muncul 2–3 detik</strong> lalu hilang. Penalti −15/tebakan.</div>
+        <div class="hw-mode-desc">4 digit unik. Hasil DOT &amp; FAME hanya <strong style="color:var(--gold);">muncul 2–3 detik</strong> lalu hilang. Penalti −25/tebakan.</div>
       </div>
       <div class="hw-mode smart">
         <div class="hw-mode-title smart">🧠 SMART MODE</div>
-        <div class="hw-mode-desc">6 digit unik. Hanya <strong style="color:var(--red);">FAME</strong> yang ditampilkan. Penalti −10/tebakan.</div>
+        <div class="hw-mode-desc">6 digit unik. Hanya <strong style="color:var(--red);">FAME</strong> yang ditampilkan. Penalti −25/tebakan.</div>
       </div>
     </div>
     <div class="hw-section">
-      <div class="hw-eye">HINT (ditiadakan di SMART MODE)</div>
       <p class="hw-p">Tersedia <em>3 hint</em> per permainan, penalti <em>−100 poin</em> tiap penggunaan:</p>
       <div class="hint-steps">
         <div class="hint-step"><span class="hs-num">1</span><span class="hs-txt">Ganjil / Genap digit tertentu <span class="hs-tag">AMBIGU</span></span></div>
         <div class="hint-step"><span class="hs-num">2</span><span class="hs-txt">Angka yang ada di kode <span class="hs-tag">SEDANG</span></span></div>
         <div class="hint-step"><span class="hs-num">3</span><span class="hs-txt">Posisi pasti sebuah digit <span class="hs-tag">KUAT</span></span></div>
       </div>
+      <div class="hw-eye">HINT (ditiadakan di SMART MODE)</div>
     </div>
     <div class="hw-section">
       <div class="hw-eye">SISTEM SKOR</div>
       <p class="hw-p">
         Base <em>1000</em>.<br>
         − Waktu: <em>−0.5 poin/dtk</em><br>
-        − Classic: <em>−25/tebakan</em> · Fight: <em>−15/tebakan</em> · Smart: <em>−10/tebakan</em><br>
+        − Classic: <em>−25/tebakan</em> · Fight: <em>−25/tebakan</em> · Smart: <em>−25/tebakan</em><br>
         − Hint: <em>−100/penggunaan</em><br>
         Bonus milestone FAME: <em>+5, +10, +20</em>
       </p>
@@ -769,8 +770,8 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
    Tambah mode baru cukup di sini */
 const MODE_CONFIG = {
   classic:{ digits:4, showDot:true,  gPenalty:25, label:'CLASSIC',      badgeClass:'',           icon:'🧩', winFame:4 },
-  fight:  { digits:4, showDot:true,  gPenalty:15, label:'FIGHT MODE ⚔️', badgeClass:'mode-fight', icon:'⚔️', winFame:4 },
-  smart:  { digits:6, showDot:false, gPenalty:10, label:'SMART MODE 🧠', badgeClass:'mode-smart', icon:'🧠', winFame:6 }
+  fight:  { digits:4, showDot:true,  gPenalty:25, label:'FIGHT MODE ⚔️', badgeClass:'mode-fight', icon:'⚔️', winFame:4 },
+  smart:  { digits:6, showDot:false, gPenalty:25, label:'SMART MODE 🧠', badgeClass:'mode-smart', icon:'🧠', winFame:6 }
 };
 
 /* ── STATE ─────────────────────────────────── */
@@ -816,14 +817,14 @@ function calcLiveScore(){
 function calcSurrScore(g){return Math.min(-100,-1000+(g*40));}
 
 function getGrade(s){
-  if(s>=900)return'⚡ MASTERMIND';
-  if(s>=800)return'🧠 AHLI LOGIKA';
-  if(s>=700)return'🔍 ANALIS ELIT';
-  if(s>=600)return'♟️ STRATEGIS';
-  if(s>=500)return'🕵️ INVESTIGATOR';
-  if(s>=400)return'📋 PENELITI';
-  if(s>=300)return'👁️ PENGAMAT';
-  if(s>=200)return'🌱 PEMULA';
+  if(s>=970)return'⚡ MASTERMIND';
+  if(s>=850)return'🧠 AHLI LOGIKA';
+  if(s>=750)return'🔍 ANALIS ELIT';
+  if(s>=650)return'♟️ STRATEGIS';
+  if(s>=550)return'🕵️ INVESTIGATOR';
+  if(s>=450)return'📋 PENELITI';
+  if(s>=350)return'👁️ PENGAMAT';
+  if(s>=250)return'🌱 PEMULA';
   return'🐒 SIMPANSE';
 }
 function getSurrGrade(s){
