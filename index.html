@@ -4,33 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MASTER CIPHER</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22></text></svg>">
 <script src="https://cdn.counter.dev/script.js" data-id="f50a69b0-c292-4c03-9f3e-67fdc05d49eb" data-utcoffset="7"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Special+Elite&display=swap');
 
 :root {
-  --black:      #060606;
+  --black:      #08070a;
   --panel:      #111;
   --border:     #1c1c1c;
   --dim:        #252525;
-  --muted:      #444;
+  --muted:      #6b6558;
   --sub:        #888;
-  --text:       #bbb;
-  --white:      #efefef;
-  --gold:       #e8c84a;
-  --gold-dim:   rgba(232,200,74,0.10);
-  --gold-glow:  rgba(232,200,74,0.25);
+  --text:       #cfc8b8;
+  --white:      #d9cca1;
+  --gold:       #b8923f;
+  --gold-dim:   rgba(184,146,63,0.10);
+  --gold-glow:  rgba(184,146,63,0.25);
   --teal:       #4ae8c8;
   --teal-dim:   rgba(74,232,200,0.08);
-  --red:        #e84a4a;
-  --red-dim:    rgba(232,74,74,0.08);
-  --green:      #4ae87a;
-  --green-dim:  rgba(74,232,122,0.10);
-  --green-glow: rgba(74,232,122,0.25);
+  --red:        #8b3030;
+  --red-dim:    rgba(139,48,48,0.08);
+  --green:      #3f6b4a;
+  --green-dim:  rgba(63,107,74,0.10);
+  --green-glow: rgba(63,107,74,0.25);
   --r:   4px;
   --r-lg:8px;
   --tr:  0.15s ease;
 }
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{background:var(--black);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
 button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:none;color:inherit;}
@@ -57,6 +59,9 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
    HOME
 ════════════════════════════════════════ */
 #s-home{align-items:center;justify-content:center;padding:40px 24px;position:relative;overflow:hidden;}
+.bg-slideshow{position:absolute;inset:0;z-index:0;background:#000;}
+.bg-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 3s ease;filter:grayscale(40%) brightness(.5);}
+.bg-slide.active{opacity:1;}
 .home-grid{
   position:absolute;inset:0;pointer-events:none;
   background-image:linear-gradient(rgba(232,200,74,.035) 1px,transparent 1px),
@@ -71,15 +76,19 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 
 .home-eyebrow{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:6px;color:rgba(232,200,74,.4);margin-bottom:14px;position:relative;z-index:2;}
 .home-logo{position:relative;z-index:2;text-align:center;margin-bottom:6px;line-height:.85;}
-.logo-master{font-family:'Orbitron',sans-serif;font-size:clamp(40px,13vw,64px);font-weight:900;color:var(--white);letter-spacing:-1px;}
-.logo-cipher{font-family:'Orbitron',sans-serif;font-size:clamp(40px,13vw,64px);font-weight:900;color:var(--gold);letter-spacing:-1px;display:block;}
+.logo-master{font-family:'Special Elite',monospace;font-size:clamp(40px,12vw,64px);color:var(--white);letter-spacing:2px;text-shadow:0 0 14px rgba(217,204,161,.25);}
+.logo-cipher{font-family:'Courier Prime','Share Tech Mono',monospace;font-weight:700;font-size:clamp(36px,11vw,56px);color:var(--gold);letter-spacing:6px;display:flex;justify-content:center;gap:2px;text-shadow:0 0 16px var(--gold-glow);}
+.logo-cipher span{display:inline-block;min-width:0.62em;}
 .home-tagline{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-top:10px;margin-bottom:32px;position:relative;z-index:2;}
 
 /* Mode cards */
 .mode-cards{width:100%;max-width:360px;display:flex;flex-direction:column;gap:8px;margin-bottom:16px;position:relative;z-index:2;}
 .mode-card{
-  background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  position:relative;
+  background:linear-gradient(180deg, rgba(217,204,161,.025), transparent), var(--panel);
+  border:1px solid rgba(217,204,161,.14);
   cursor:pointer;overflow:hidden;display:flex;align-items:stretch;
+  clip-path:polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
   transition:border-color var(--tr),background var(--tr);user-select:none;
 }
 .mode-card:active{background:var(--dim);}
@@ -102,11 +111,11 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 .mode-card[data-mode="smart"].sel .mc-title{color:var(--red);}
 .mode-card[data-mode="smart"].sel .mc-tag{color:var(--red);border-color:rgba(232,74,74,.3);}
 
-.mc-accent{width:3px;flex-shrink:0;background:var(--muted);transition:background var(--tr);}
+.mc-accent{display:none;}
 .mc-body{padding:15px 16px;flex:1;display:flex;flex-direction:column;gap:4px;}
 .mc-top{display:flex;align-items:center;justify-content:space-between;}
 .mc-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;color:var(--white);letter-spacing:1px;transition:color var(--tr);}
-.mc-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);border:1px solid var(--border);border-radius:2px;padding:3px 7px;transition:color var(--tr),border-color var(--tr);}
+.mc-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);border:1px solid var(--border);border-radius:2px;padding:3px 7px;transform:rotate(-2deg);transition:color var(--tr),border-color var(--tr);}
 .mc-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.5px;}
 
 .btn-main{
@@ -368,7 +377,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 
 .fs-header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);background:var(--black);position:sticky;top:0;z-index:1;}
 .fs-title{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:700;color:var(--white);}
-.btn-close{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:3px;padding:7px 12px;cursor:pointer;}
+.btn-close{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text);background:transparent;border:1px solid var(--border);border-radius:3px;padding:7px 12px;cursor:pointer;}
 .btn-close:active{border-color:var(--gold);}
 .fs-body{flex:1;overflow-y:auto;padding:20px;}
 
@@ -388,10 +397,9 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 .hw-ex-r{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--sub);margin-left:6px;}
 .hw-divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .hw-mode{border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;}
-.hw-mode.smart{border-color:rgba(232,74,74,.3);background:rgba(232,74,74,.04);}
 .hw-mode-title{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--white);margin-bottom:6px;}
 .hw-mode-title.smart{color:var(--red);}
-.hw-mode-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+.hw-mode-desc{font-size:13px;color:var(--text);line-height:1.6;}
 .hint-steps{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
 .hint-step{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;}
 .hs-num{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--gold);width:16px;flex-shrink:0;}
@@ -467,6 +475,9 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
      HOME
 ════════════════════════════════════ -->
 <div id="s-home" class="screen active">
+  <div class="bg-slideshow" id="bg-slideshow">
+  <div class="bg-slide" id="bg-slide"></div>
+  </div>
   <div class="home-grid"></div>
   <div class="home-scanline"></div>
 
@@ -479,8 +490,8 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 
   <div class="home-eyebrow">CRACK THE CODE</div>
   <div class="home-logo">
-    <span class="logo-master">MASTER</span>
-    <span class="logo-cipher">CIPHER</span>
+  <span class="logo-master">MASTER</span>
+  <span class="logo-cipher" id="cipher-decode"></span>
   </div>
   <div class="home-tagline"></div>
 
@@ -509,12 +520,6 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
   </div>
 
   <button class="btn-main" onclick="startGame()">PLAY GAME</button>
-
-  <div class="home-stats">
-    <div class="hs-item"><div class="hs-val" id="hs-played">0</div><div class="hs-lbl">DIMAINKAN</div></div>
-    <div class="hs-item"><div class="hs-val" id="hs-won">0</div><div class="hs-lbl">MENANG</div></div>
-    <div class="hs-item"><div class="hs-val" id="hs-best">—</div><div class="hs-lbl">SKOR TERBAIK</div></div>
-  </div>
 </div>
 
 <!-- ════════════════════════════════════
@@ -616,7 +621,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
     <div class="dialog-body">Progress game ini akan hilang.<br>Kode rahasia tidak akan disimpan.</div>
     <div class="dialog-actions">
       <button class="btn-back" onclick="hideOverlay('confirm-home-overlay')">PLAY TO GAME</button>
-      <button class="btn-danger" onclick="hideOverlay('confirm-home-overlay');goHome()">GO IN`HOME</button>
+      <button class="btn-danger" onclick="hideOverlay('confirm-home-overlay');abandonGame()">GO IN HOME</button>
     </div>
   </div>
 </div>
@@ -652,7 +657,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
     </div>
     <div class="sur-msg" id="sur-msg" style="display:none"></div>
     <div class="res-btns">
-      <button class="btn-main" onclick="goHome()">MAIN LAGI DERR</button>
+      <button class="btn-main" onclick="goHome()">MAIN LAGI</button>
       <button class="btn-sec" onclick="openResultReview()">LIHAT RIWAYAT TEBAKAN</button>
     </div>
   </div>
@@ -1034,6 +1039,12 @@ function goHome(){
   music.currentTime=0;
   music.play().catch(()=>{});
 }
+function abandonGame(){
+  if(G.gameStarted&&!G.gameOver){
+    addLog({mode:G.mode,won:false,surrendered:false,score:0,guesses:G.guessCount,elapsed:G.elapsed,hintUsed:G.hintUsed,ts:Date.now()});
+  }
+  goHome();
+}
 function confirmGoHome(){
   if(!G.gameStarted||G.gameOver){goHome();return;}
   showOverlay('confirm-home-overlay');
@@ -1306,6 +1317,59 @@ function buildReview(){
 /* ── INIT ──────────────────────────────────── */
 renderHomeStats();
 
+/* ── LOGO DECODE EFFECT ────────────────────── */
+(function(){
+  const target='CIPHER';
+  const glyphs='█▓░#%&XQ0123456789';
+  const el=document.getElementById('cipher-decode');
+  if(!el)return;
+  target.split('').forEach(()=>{const s=document.createElement('span');el.appendChild(s);});
+  const spans=el.querySelectorAll('span');
+  function decode(){
+    let locked=0;
+    const timer=setInterval(()=>{
+      spans.forEach((s,i)=>{
+        if(i<locked){s.textContent=target[i];return;}
+        s.textContent=glyphs[Math.floor(Math.random()*glyphs.length)];
+      });
+      if(Math.random()<0.35&&locked<target.length){
+        spans[locked].textContent=target[locked];
+        locked++;
+      }
+      if(locked>=target.length)clearInterval(timer);
+    },70);
+  }
+  decode();
+  setInterval(decode,4000);
+})();
+
+/* ── BG SLIDESHOW ──────────────────────────── */
+(function(){
+  const el=document.getElementById('bg-slide');
+  if(!el)return;
+  const images=['bg1.jpeg','bg2.jpeg','bg3.jpeg','bg4.jpeg','bg5.jpeg','bg6.jpeg','bg7.jpeg','bg8.jpeg'];
+  const FADE_MS=1800;   // lama muncul & memudar
+  const HOLD_MS=3000;   // lama foto diam terlihat penuh, sebelum mulai memudar
+  let lastIdx=-1;
+
+  function nextIndex(){
+    let i;
+    do{i=Math.floor(Math.random()*images.length);}while(i===lastIdx&&images.length>1);
+    lastIdx=i;
+    return i;
+  }
+
+  function cycle(){
+    el.style.backgroundImage=`url('${images[nextIndex()]}')`;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('active'))); // mulai muncul
+    setTimeout(()=>{
+      el.classList.remove('active'); // mulai memudar ke hitam
+      setTimeout(cycle,FADE_MS);     // setelah selesai memudar, ganti foto & ulang
+    },FADE_MS+HOLD_MS);
+  }
+  cycle();
+})();
+
 /* ── SOUND: KLIK/BEEP ──────────────────────── */
 let audioCtx=null;
 function playClick(){
@@ -1315,15 +1379,31 @@ function playClick(){
     const gain=audioCtx.createGain();
     osc.type='square';
     osc.frequency.value=720;
-    gain.gain.value=0.05;
+    gain.gain.value=0.07;
     osc.connect(gain);gain.connect(audioCtx.destination);
     osc.start();
     gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.08);
     osc.stop(audioCtx.currentTime+0.08);
   }catch(e){}
 }
+function playBeep(){
+  try{
+    if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+    osc.type='sine';
+    osc.frequency.value=880;
+    gain.gain.value=0.07;
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.15);
+    osc.stop(audioCtx.currentTime+0.15);
+  }catch(e){}
+}
 document.addEventListener('click',function(e){
-  if(e.target.closest('button,.menu-item,.mode-card')){
+  if(e.target.closest('.mode-card')){
+    playBeep();
+  }else if(e.target.closest('button,.menu-item')){
     playClick();
   }
 });
