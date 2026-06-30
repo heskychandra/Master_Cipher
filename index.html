@@ -182,7 +182,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 .hint-chip{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--teal);border:1px solid rgba(74,232,200,.25);border-radius:3px;padding:4px 8px;}
 
 /* Mode banners */
-.mode-banner{padding:7px 16px;display:flex;align-items:center;justify-content:space-between;}
+.mode-banner{padding:5px 16px;display:flex;align-items:center;justify-content:space-between;}
 .fight-banner{background:rgba(232,200,74,.06);border-bottom:1px solid rgba(232,200,74,.18);}
 .smart-banner{background:rgba(232,74,74,.06);border-bottom:1px solid rgba(232,74,74,.18);}
 .mb-text{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;}
@@ -193,19 +193,19 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 .smart-banner .mb-dot{background:var(--red);}
 
 /* History panel */
-.history{flex:1;min-height:0;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px;}
+.history{flex:1;min-height:0;overflow-y:auto;padding:8px 14px;display:flex;flex-direction:column;gap:4px;}
 .h-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:48px 0;}
 .h-empty-icon{font-size:28px;opacity:.25;}
 .h-empty-txt{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);}
 .h-row{
   display:flex;align-items:center;gap:8px;
-  padding:9px 12px;background:var(--panel);border:1px solid var(--border);
+  padding:6px 10px;background:var(--panel);border:1px solid var(--border);
   border-radius:var(--r);animation:slidein .18s ease;
 }
 @keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .h-idx{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);width:16px;flex-shrink:0;}
 .h-digits{display:flex;gap:3px;flex:1;}
-.h-d{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--white);width:24px;text-align:center;}
+.h-d{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--white);width:21px;text-align:center;}
 .h-d.smart{font-size:13px;width:18px;}
 .h-result{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:72px;}
 .h-dot-row{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);display:flex;align-items:center;gap:5px;}
@@ -896,10 +896,12 @@ function setFilter(el,filter){
   renderRiwayat(filter);
 }
 
+let currentRwLogs=[];
 function renderRiwayat(filter){
   const all=loadLog();
   const logs=filterLog(all,filter);
-
+  currentRwLogs=[...logs].reverse();
+  
   /* Stats */
   const played=logs.length;
   const won=logs.filter(l=>l.won).length;
@@ -946,8 +948,8 @@ function renderRiwayat(filter){
   const body=document.getElementById('rw-log-body');
   if(logs.length===0){body.innerHTML=`<div class="rw-empty">BELUM ADA RIWAYAT</div>`;return;}
   const modeIcon={'classic':'🧩','fight':'⚔️','smart':'🧠'};
-  body.innerHTML=[...logs].reverse().map(l=>`
-    <div class="rw-log-row">
+  body.innerHTML=currentRwLogs.map((l,i)=>`
+    <div class="rw-log-row" onclick="viewLogDetail(${i})" style="cursor:pointer;">
       <span class="rw-icon">${modeIcon[l.mode]||'🎮'}</span>
       <div class="rw-body">
         <div class="rw-score${l.score<0?' neg':''}">${l.score}</div>
@@ -1042,7 +1044,7 @@ function goHome(){
 }
 function abandonGame(){
   if(G.gameStarted&&!G.gameOver){
-    addLog({mode:G.mode,won:false,surrendered:false,score:0,guesses:G.guessCount,elapsed:G.elapsed,hintUsed:G.hintUsed,ts:Date.now()});
+   addLog({mode:G.mode,won,surrendered,score:finalScore,guesses:G.guessCount,elapsed:G.elapsed,hintUsed:G.hintUsed,ts:Date.now(),secret:[...G.secret],guessHistory:JSON.parse(JSON.stringify(G.history))});
   }
   goHome();
 }
@@ -1295,8 +1297,37 @@ function endGame(won,surrendered){
 }
 
 /* ── REVIEW ────────────────────────────────── */
-function openResultReview(){buildReview();showOverlay('review-overlay');}
-function closeReview(){hideOverlay('review-overlay');}
+let reviewReturnTo=null;
+function openResultReview(){reviewReturnTo=null;buildReview();showOverlay('review-overlay');}
+function closeReview(){
+  hideOverlay('review-overlay');
+  if(reviewReturnTo)showOverlay(reviewReturnTo);
+}
+function viewLogDetail(i){
+  const l=currentRwLogs[i];
+  if(!l)return;
+  reviewReturnTo='riwayat-overlay';
+  hideOverlay('riwayat-overlay');
+  const body=document.getElementById('review-body');
+  if(!l.guessHistory){
+    body.innerHTML=`<div style="text-align:center;padding:32px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);">DETAIL TIDAK TERSEDIA UNTUK GAME SEBELUM PEMBARUAN INI</div>`;
+    showOverlay('review-overlay');
+    return;
+  }
+  const isSmart=l.mode==='smart';
+  let gi=0;
+  let html=`<div class="review-secret">KODE: ${l.secret.join(' · ')}</div>`;
+  html+=l.guessHistory.map(h=>{
+    if(h.isHint)return`<div class="h-row" style="border-color:rgba(74,232,200,.2);background:rgba(74,232,200,.04);"><span class="h-hint-tag">HINT −100</span><span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--sub);flex:1;padding-left:8px;">${h.hintText}</span></div>`;
+    gi++;
+    const resultHtml=isSmart
+      ?`<div class="h-fame-row smart"><span>FAME</span><span class="h-fn">${h.fame}</span></div>`
+      :`<div class="h-dot-row"><span>DOT</span><span class="h-dn">${h.dot}</span></div><div class="h-fame-row"><span>FAME</span><span class="h-fn">${h.fame}</span></div>`;
+    return`<div class="h-row"><span class="h-idx">${gi}</span><div class="h-digits">${h.guess.map(d=>`<div class="h-d${isSmart?' smart':''}">${d}</div>`).join('')}</div><div class="h-result">${resultHtml}</div></div>`;
+  }).join('');
+  body.innerHTML=html;
+  showOverlay('review-overlay');
+}
 function buildReview(){
   const body=document.getElementById('review-body');
   const isSmart=G.mode==='smart';
