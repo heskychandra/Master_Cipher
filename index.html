@@ -38,7 +38,7 @@ html,body{background:var(--black);color:var(--text);font-family:'Rajdhani',sans-
 button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:none;color:inherit;}
 
 /* ── SCREENS ── */
-.screen{display:none;flex-direction:column;min-height:100vh;max-width:440px;margin:0 auto;width:100%;}
+.screen{display:none;flex-direction:column;height:100vh;max-width:440px;margin:0 auto;width:100%;overflow:hidden;}
 .screen.active{display:flex;}
 
 /* ── OVERLAY ──
@@ -76,8 +76,8 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 
 .home-eyebrow{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:6px;color:rgba(232,200,74,.4);margin-bottom:14px;position:relative;z-index:2;}
 .home-logo{position:relative;z-index:2;text-align:center;margin-bottom:6px;line-height:.85;}
-.logo-master{font-family:'Special Elite',monospace;font-size:clamp(44px,13vw,66px);color:var(--white);letter-spacing:2px;text-shadow:0 0 14px rgba(217,204,161,.25);}
-.logo-cipher{font-family:'Courier Prime','Share Tech Mono',monospace;font-weight:700;font-size:clamp(40px,12vw,60px);color:var(--gold);letter-spacing:6px;display:flex;justify-content:center;gap:2px;text-shadow:0 0 16px var(--gold-glow);}
+.logo-master{font-family:'Special Elite',monospace;font-size:clamp(52px,15vw,76px);color:var(--white);letter-spacing:2px;text-shadow:0 0 14px rgba(217,204,161,.25);}
+.logo-cipher{font-family:'Courier Prime','Share Tech Mono',monospace;font-weight:700;font-size:clamp(46px,14vw,68px);color:var(--gold);letter-spacing:6px;display:flex;justify-content:center;gap:2px;text-shadow:0 0 16px var(--gold-glow);}
 .logo-cipher span{display:inline-block;min-width:0.62em;}
 .home-tagline{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-top:10px;margin-bottom:32px;position:relative;z-index:2;}
 
@@ -153,7 +153,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 #s-game{position:relative;}
 .g-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;border-bottom:1px solid var(--border);
+  padding:8px 16px;border-bottom:1px solid var(--border);
   position:sticky;top:0;background:var(--black);z-index:10;
 }
 .gh-left{display:flex;flex-direction:column;}
@@ -176,7 +176,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 }
 .btn-home-game:active{border-color:var(--gold);color:var(--gold);}
 
-.score-bar{padding:8px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.score-bar{padding:5px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .sb-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);}
 .sb-score{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--gold);transition:color .3s;}
 .hint-chip{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--teal);border:1px solid rgba(74,232,200,.25);border-radius:3px;padding:4px 8px;}
@@ -193,7 +193,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 .smart-banner .mb-dot{background:var(--red);}
 
 /* History panel */
-.history{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px;}
+.history{flex:1;min-height:0;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px;}
 .h-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:48px 0;}
 .h-empty-icon{font-size:28px;opacity:.25;}
 .h-empty-txt{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);}
@@ -220,6 +220,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 .fd-display{
   display:flex;align-items:center;justify-content:center;
   margin-bottom:10px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;
+  max-height:80px;overflow-y:auto;
 }
 .fd-item{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 12px;}
 .fd-sep{width:1px;background:var(--border);align-self:stretch;}
@@ -235,8 +236,8 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 /* Input boxes */
 .cur-input{display:flex;gap:6px;justify-content:center;margin-bottom:10px;flex-wrap:nowrap;}
 .i-box{
-  width:56px;height:64px;background:var(--panel);border:2px solid var(--border);
-  border-radius:var(--r);font-family:'Orbitron',sans-serif;font-size:26px;font-weight:700;
+  width:56px;height:54px;background:var(--panel);border:2px solid var(--border);
+  border-radius:var(--r);font-family:'Orbitron',sans-serif;font-size:24px;font-weight:700;
   color:var(--white);display:flex;align-items:center;justify-content:center;
   transition:border-color var(--tr),box-shadow var(--tr);flex-shrink:0;
 }
@@ -272,7 +273,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 .n-btn{
   background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
   color:var(--white);font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;
-  padding:13px 6px;cursor:pointer;text-align:center;user-select:none;transition:background var(--tr);
+  padding:10px 6px;cursor:pointer;text-align:center;user-select:none;transition:background var(--tr);
 }
 .n-btn:active{background:var(--dim);}
 .n-del{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;color:var(--red);border-color:rgba(232,74,74,.2);}
@@ -458,10 +459,10 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
 @media(max-width:360px){
-  .i-box{width:46px;height:56px;font-size:20px;}
-  .i-box.sm{width:32px;height:48px;font-size:15px;}
-  .n-btn{padding:11px 4px;font-size:15px;}
-  .logo-master,.logo-cipher{font-size:40sSpx;}
+  .i-box{width:46px;height:50px;font-size:19px;}
+  .i-box.sm{width:32px;height:44px;font-size:15px;}
+  .n-btn{padding:9px 4px;font-size:15px;}
+  .logo-master,.logo-cipher{font-size:44px;}
 }
 </style>
 </head>
@@ -678,7 +679,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 <div id="howto-overlay" class="overlay overlay-fs" style="background:rgba(6,6,6,.97);">
   <div class="fs-header">
     <span class="fs-title">CARA BERMAIN</span>
-    <button class="btn-close" onclick="hideOverlay('howto-overlay')">TUTUP</button>
+    <button class="btn-close" onclick="hideOverlay('howto-overlay');showOverlay('menu-overlay')">TUTUP</button>
   </div>
   <div class="fs-body">
     <div class="hw-section">
@@ -731,7 +732,7 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 <div id="riwayat-overlay" class="overlay overlay-fs" style="background:rgba(6,6,6,.97);">
   <div class="fs-header">
     <span class="fs-title">RIWAYAT &amp; STATISTIK</span>
-   <button class="btn-close" onclick="hideOverlay('riwayat-overlay')">TUTUP</button>
+   <button class="btn-close" onclick="hideOverlay('riwayat-overlay');showOverlay('menu-overlay')">TUTUP</button>
   </div>
 
   <!-- Filter tabs -->
@@ -915,11 +916,11 @@ function renderRiwayat(filter){
       <div class="rw-stat-val gold">${played}</div>
     </div>
     <div class="rw-stat-card">
-      <div class="rw-stat-label">MENANG</div>
+      <div class="rw-stat-label">BERHASIL</div>
       <div class="rw-stat-val green">${won}</div>
     </div>
     <div class="rw-stat-card">
-      <div class="rw-stat-label">KALAH</div>
+      <div class="rw-stat-label">KELUAR</div>
       <div class="rw-stat-val red">${loses}</div>
     </div>
     <div class="rw-stat-card">
@@ -1378,7 +1379,7 @@ function playClick(){
     const osc=audioCtx.createOscillator();
     const gain=audioCtx.createGain();
     osc.type='square';
-    osc.frequency.value=720;
+    osc.frequency.value=730;
     gain.gain.value=0.07;
     osc.connect(gain);gain.connect(audioCtx.destination);
     osc.start();
