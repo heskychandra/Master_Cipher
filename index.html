@@ -8,6 +8,7 @@
 <script src="https://cdn.counter.dev/script.js" data-id="f50a69b0-c292-4c03-9f3e-67fdc05d49eb" data-utcoffset="7"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Special+Elite&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
 
 :root {
   --black:      #08070a;
@@ -114,7 +115,33 @@ button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;background:n
 .mc-accent{display:none;}
 .mc-body{padding:15px 16px;flex:1;display:flex;flex-direction:column;gap:4px;}
 .mc-top{display:flex;align-items:center;justify-content:space-between;}
-.mc-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;color:var(--white);letter-spacing:1px;transition:color var(--tr);}
+.mc-title{
+
+    position:relative;
+
+    display:inline-block;
+
+    font-family:'Special Elite', monospace;
+
+    font-size:18px;
+
+    font-weight:400;
+
+    letter-spacing:2px;
+
+    text-transform:uppercase;
+
+    color:#d8c79d;
+
+    line-height:1.15;
+
+    text-shadow:
+        0 1px 0 rgba(255,255,255,.04),
+        0 0 6px rgba(184,146,63,.18);
+
+    transition:.25s;
+
+}
 .mc-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);border:1px solid var(--border);border-radius:2px;padding:3px 7px;transform:rotate(-2deg);transition:color var(--tr),border-color var(--tr);}
 .mc-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.5px;}
 
@@ -841,7 +868,7 @@ function getSurrMsg(s,g,mf){
 }
 
 /* ── LOCAL STORAGE ─────────────────────────── */
-const LS_LOG='mc_log', LS_SCORES='mc_scores';
+const LS_LOG='mc_log', LS_SCORES='mc_scores', LS_ACTIVE='mc_active';
 function loadLog(){try{return JSON.parse(localStorage.getItem(LS_LOG))||[];}catch(e){return[];}}
 function addLog(entry){
   let l=loadLog();l.push(entry);if(l.length>200)l=l.slice(-200);
@@ -1037,6 +1064,7 @@ function startGame(){
 
 function goHome(){
   clearInterval(G.timerInterval);
+  localStorage.removeItem(LS_ACTIVE);
   renderHomeStats();
   showScreen('s-home');
   const music=document.getElementById('bg-music');
@@ -1130,6 +1158,7 @@ function submitGuess(){
   }
 
   G.history.push({guess,dot:res.dot,fame:res.fame,isHint:false,bonusGained});
+  saveActiveGame();
   document.getElementById('sv-guess').textContent=G.guessCount;
   if(cfg().showDot)document.getElementById('fd-dot').textContent=res.dot;
   document.getElementById('fd-fame').textContent=res.fame;
@@ -1346,6 +1375,36 @@ function buildReview(){
     }).join('');
   body.innerHTML=html;
 }
+
+/* ── ACTIVE GAME SNAPSHOT ──────────────────── */
+function saveActiveGame(){
+  if(!G.gameStarted||G.gameOver)return;
+  try{
+    localStorage.setItem(LS_ACTIVE,JSON.stringify({
+      mode:G.mode,secret:[...G.secret],
+      guesses:G.guessCount,elapsed:G.elapsed,
+      hintUsed:G.hintUsed,history:JSON.parse(JSON.stringify(G.history)),
+      ts:Date.now()
+    }));
+  }catch(e){}
+}
+function checkAbandonedGame(){
+  try{
+    const raw=localStorage.getItem(LS_ACTIVE);
+    if(!raw)return;
+    const snap=JSON.parse(raw);
+    localStorage.removeItem(LS_ACTIVE);
+    if(!snap||snap.guesses===0)return;
+    addLog({
+      mode:snap.mode,won:false,surrendered:false,score:0,
+      guesses:snap.guesses,elapsed:snap.elapsed,hintUsed:snap.hintUsed,
+      ts:snap.ts,secret:snap.secret,guessHistory:snap.history,
+      abandoned:true
+    });
+  }catch(e){}
+}
+window.addEventListener('pagehide',()=>{saveActiveGame();});
+checkAbandonedGame();
 
 /* ── INIT ──────────────────────────────────── */
 renderHomeStats();
